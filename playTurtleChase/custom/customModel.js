@@ -14,7 +14,7 @@ var ticks = 0;
 let overlay;
 let video;
 
-let vidWidth = 240;
+let vidWidth = 320;
 let vidHeight = 240;
 
 // Bounding box overlay code
@@ -133,10 +133,10 @@ function processVideo() {
     noseY = (result[0][1] * this.height / 93.0) + this.y;
 
     // Bounding box overlay code
-    boundX = this.x * 640 / 240;
-    boundY = this.y * 360 / 240;
-    boundWidth = this.width * 640 / 240;
-    boundHeight = this.height * 360 / 240;
+    boundX = this.x * vidWidth / 240;
+    boundY = this.y * vidHeight / 240;
+    boundWidth = this.width * vidWidth  / 240;
+    boundHeight = this.height * vidHeight / 240;
 
     let point1 = new cv.Point(this.x, this.y);
     let point2 = new cv.Point(this.x + this.width, this.y + this.height);
@@ -156,12 +156,12 @@ function processVideo() {
 function setup() {
   // Webcam capture
   video = createCapture(VIDEO);
-  video.size(640, 360);
+  video.size(vidWidth, vidHeight);
   video.parent('videoContainer')
 
   // Graphics overlay for monitor annotations
   pixelDensity(1);
-  overlay = createGraphics(640, 360);
+  overlay = createGraphics(vidWidth, vidHeight);
   overlay.parent('videoContainer');
 
   // Hide the video so it doesn't render
@@ -170,7 +170,7 @@ function setup() {
   // Show graphics
   overlay.show();
   // Flip graphics so you get proper mirroring of video and nose dot
-  overlay.translate(640,0);
+  overlay.translate(vidWidth, 0);
   overlay.scale(-1.0, 1.0);
 }
 
@@ -186,7 +186,7 @@ function draw() {
   // Render nose dot
   overlay.stroke(0, 225, 0); // Green
   overlay.strokeWeight(5);
-  overlay.ellipse(noseX  * 640 / 240, noseY * 360 / 240, 1, 1);
+  overlay.ellipse(noseX  * vidWidth  / 240, noseY * vidHeight / 240, 1, 1);
 
   // Bounding box overlay code
   // Render bounding box
