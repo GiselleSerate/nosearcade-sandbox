@@ -119,10 +119,11 @@ function processVideo() {
   // Record the result
   prediction.array().then(function(result) {
 
+    // Nose coordinates in monitor frame
     noseX = ((result[0][0] * this.width / 96.0) + this.x) * vidWidth  / 240;
     noseY = ((result[0][1] * this.height / 96.0) + this.y) * vidHeight / 240;
 
-    // Bounding box overlay coords
+    // Bounding box overlay coords in monitor frame
     boundX = this.x * vidWidth / 240;
     boundY = this.y * vidHeight / 240;
     boundWidth = this.width * vidWidth  / 240;
