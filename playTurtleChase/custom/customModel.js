@@ -14,10 +14,10 @@ var ticks = 0;
 let overlay;
 let video;
 
-let vidWidth = 320;
+let vidWidth = 240;
 let vidHeight = 240;
 
-// Bounding box overlay code
+// Bounding box overlay coords
 let boundX;
 let boundY;
 let boundWidth;
@@ -32,7 +32,7 @@ let classifier;
 cv['onRuntimeInitialized']=()=>{
   // Create desired matricies
   src = new cv.Mat(webcamElement.height, webcamElement.width, cv.CV_8UC4);
-  dst = new cv.Mat(vidHeight, vidWidth, cv.CV_8UC4)
+  dst = new cv.Mat(vidHeight, vidWidth, cv.CV_8UC4);
   cap = new cv.VideoCapture(webcam); 
   gray = new cv.Mat();
   face = new cv.Mat();
@@ -73,8 +73,8 @@ imported.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.1';
 imported.onload = async function(){
   // Set up
   await setupWebcam();
-  // model = await tf.loadLayersModel('https://matthewcalligaro.github.io/TheNoseArcade/playTurtleChase/custom/model.json');
-  model = await tf.loadLayersModel('https://giselleserate.github.io/nosearcade-sandbox/playTurtleChase/custom/model.json');
+  model = await tf.loadLayersModel('https://matthewcalligaro.github.io/TheNoseArcade/playTurtleChase/custom/model.json');
+  // model = await tf.loadLayersModel('https://giselleserate.github.io/nosearcade-sandbox/playTurtleChase/custom/model.json');
 
   // Process the video
   interval = window.setInterval(function () {
@@ -124,7 +124,7 @@ function processVideo() {
     noseX = (result[0][0] * this.width / 96.0) + this.x;
     noseY = (result[0][1] * this.height / 96.0) + this.y;
 
-    // Bounding box overlay code
+    // Bounding box overlay coords
     boundX = this.x * vidWidth / 240;
     boundY = this.y * vidHeight / 240;
     boundWidth = this.width * vidWidth  / 240;
@@ -154,7 +154,7 @@ function setup() {
   // Show graphics
   overlay.show();
   // Flip graphics so you get proper mirroring of video and nose dot
-  overlay.translate(vidWidth, 0);
+  overlay.translate(vidWidth,0);
   overlay.scale(-1.0, 1.0);
 }
 
@@ -170,9 +170,8 @@ function draw() {
   // Render nose dot
   overlay.stroke(0, 225, 0); // Green
   overlay.strokeWeight(5);
-  overlay.ellipse(noseX  * vidWidth  / 240, noseY * vidHeight / 240, 1, 1);
+  overlay.ellipse(noseX, noseY, 1, 1);
 
-  // Bounding box overlay code
   // Render bounding box
   overlay.stroke(255, 0, 0); // Red
   overlay.noFill();
