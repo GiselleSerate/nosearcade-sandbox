@@ -17,14 +17,13 @@ let video;
 let vidWidth = 320;
 let vidHeight = 240;
 
-// Bounding box overlay code
+// Bounding box overlay coords
 let boundX;
 let boundY;
 let boundWidth;
 let boundHeight;
 
 let src;
-let dst;
 let cap;
 let gray;
 let face;
@@ -32,7 +31,6 @@ let classifier;
 cv['onRuntimeInitialized']=()=>{
   // Create desired matricies
   src = new cv.Mat(webcamElement.height, webcamElement.width, cv.CV_8UC4);
-  dst = new cv.Mat(vidHeight, vidWidth, cv.CV_8UC4)
   cap = new cv.VideoCapture(webcam); 
   gray = new cv.Mat();
   face = new cv.Mat();
@@ -48,7 +46,6 @@ cv['onRuntimeInitialized']=()=>{
 
 // Set up the webcam
 const webcamElement = document.getElementById('webcam');
-const outputElement = document.getElementById('canvasOutput');
 async function setupWebcam() {
   return new Promise((resolve, reject) => {
     const navigatorAny = navigator;
@@ -87,12 +84,6 @@ function processVideo() {
   // Capture the image as an OpenCV.js image
   cap.read(src);
 
-  // src.copyTo(dst);
-  let uhsize = new cv.Size(vidHeight, vidWidth);
-  // Identify the face
-  cv.resize (src, dst, uhsize, -1, 1);
-  cv.cvtColor(dst, gray, cv.COLOR_RGBA2GRAY, 0);
-
   // Identify the face
   cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
   
@@ -128,23 +119,14 @@ function processVideo() {
   // Record the result
   prediction.array().then(function(result) {
 
-    noseX = (result[0][0] * this.width / 93.0) + this.x;
-    // TODO This is pretty weird and I'm not sure if it jives with the coordinate system, but that is the nose.
-    noseY = (result[0][1] * this.height / 93.0) + this.y;
+    noseX = (result[0][0] * this.width / 96.0) + this.x;
+    noseY = (result[0][1] * this.height / 96.0) + this.y;
 
-    // Bounding box overlay code
+    // Bounding box overlay coords
     boundX = this.x * vidWidth / 240;
     boundY = this.y * vidHeight / 240;
     boundWidth = this.width * vidWidth  / 240;
     boundHeight = this.height * vidHeight / 240;
-
-    let point1 = new cv.Point(this.x, this.y);
-    let point2 = new cv.Point(this.x + this.width, this.y + this.height);
-    let point3 = new cv.Point(noseX, noseY);
-    cv.rectangle(dst, point1, point2, [255, 0, 0, 255]);
-    cv.circle(dst, point3, 1, [0, 255, 0, 255]);
-    
-    cv.imshow(outputElement, dst);
 
     sendCoords(noseX, noseY);
   }.bind(faceTransforms));
@@ -170,7 +152,7 @@ function setup() {
   // Show graphics
   overlay.show();
   // Flip graphics so you get proper mirroring of video and nose dot
-  overlay.translate(vidWidth, 0);
+  overlay.translate(vidWidth,0);
   overlay.scale(-1.0, 1.0);
 }
 
@@ -186,9 +168,8 @@ function draw() {
   // Render nose dot
   overlay.stroke(0, 225, 0); // Green
   overlay.strokeWeight(5);
-  overlay.ellipse(noseX  * vidWidth  / 240, noseY * vidHeight / 240, 1, 1);
+  overlay.ellipse(noseX, noseY, 1, 1);
 
-  // Bounding box overlay code
   // Render bounding box
   overlay.stroke(255, 0, 0); // Red
   overlay.noFill();
