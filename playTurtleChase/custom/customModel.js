@@ -14,7 +14,7 @@ var ticks = 0;
 let overlay;
 let video;
 
-let vidWidth = 240;
+let vidWidth = 320;
 let vidHeight = 240;
 
 // Bounding box overlay coords
