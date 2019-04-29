@@ -136,7 +136,7 @@ function processVideo() {
     boundWidth = this.width * vidWidth  / 240;
     boundHeight = this.height * vidHeight / 240;
 
-    sendCoords(noseX, noseY);
+    // sendCoords(noseX, noseY);
   }.bind(faceTransforms));
 }
 
@@ -186,6 +186,7 @@ function draw() {
   // Render bounding box origin dot
   overlay.stroke(0, 0, 255); // Blue
   overlay.ellipse(boundX, boundY, 1, 1);
+  sendCoords(noseX, noseY);
 }
 
 
