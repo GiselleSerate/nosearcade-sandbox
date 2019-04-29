@@ -1,15 +1,13 @@
-var imported = document.createElement('script');
+let imported = document.createElement('script');
 document.head.appendChild(imported);
 
-// Model and output
-var model;
-let noseX;
-let noseY;
+// Model
+let model;
 
 // Evaluating
-var interval;
-var start = 0;
-var ticks = 0;
+let interval;
+let start = 0;
+let ticks = 0;
 
 let overlay;
 let video;
@@ -17,7 +15,16 @@ let video;
 let vidWidth = 320;
 let vidHeight = 240;
 
-// Bounding box overlay coords
+// Nose coords (monitor frame)
+let noseX;
+let noseY;
+
+// Boxcar/moving average filter (face frame)
+let boxcarWidth = 5;
+let lastXReadings = [];
+let lastYReadings = [];
+
+// Bounding box overlay coords (monitor frame)
 let boundX;
 let boundY;
 let boundWidth;
@@ -71,8 +78,8 @@ imported.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.1';
 imported.onload = async function(){
   // Set up
   await setupWebcam();
-  // model = await tf.loadLayersModel('https://matthewcalligaro.github.io/TheNoseArcade/playTurtleChase/custom/model.json');
-  model = await tf.loadLayersModel('https://giselleserate.github.io/nosearcade-sandbox/playTurtleChase/custom/model.json');
+  model = await tf.loadLayersModel('https://matthewcalligaro.github.io/TheNoseArcade/playTurtleChase/custom/model.json');
+  // model = await tf.loadLayersModel('https://giselleserate.github.io/nosearcade-sandbox/playTurtleChase/custom/model.json');
 
   // Process the video
   interval = window.setInterval(function () {
@@ -119,11 +126,21 @@ function processVideo() {
   // Record the result
   prediction.array().then(function(result) {
 
-    // Nose coordinates in monitor frame
-    noseX = ((result[0][0] * this.width / 96.0) + this.x) * vidWidth  / 240;
-    noseY = ((result[0][1] * this.height / 96.0) + this.y) * vidHeight / 240;
+    // Update boxcar average
+    lastXReadings.push(result[0][0]);
+    lastYReadings.push(result[0][1]);
+    if(lastXReadings.length > boxcarWidth) { // TODO I suppose I could check both arrays cause atomicity but do I care
+      lastXReadings.shift();
+      lastYReadings.shift();
+    }
+    let faceAvgX = lastXReadings.reduce((a,b) => (a+b)) / lastXReadings.length;
+    let faceAvgY = lastYReadings.reduce((a,b) => (a+b)) / lastYReadings.length;
 
-    // Bounding box overlay coords in monitor frame
+    // Nose coordinates
+    noseX = ((faceAvgX * this.width / 96.0) + this.x) * vidWidth  / 240;
+    noseY = ((faceAvgY * this.height / 96.0) + this.y) * vidHeight / 240;
+
+    // Bounding box overlay coords
     boundX = this.x * vidWidth / 240;
     boundY = this.y * vidHeight / 240;
     boundWidth = this.width * vidWidth  / 240;
@@ -176,7 +193,7 @@ function draw() {
   overlay.noFill();
   overlay.rect(boundX, boundY, boundWidth, boundHeight);
 
-  // Render bounding origin dot
+  // Render bounding box origin dot
   overlay.stroke(0, 0, 255); // Blue
   overlay.ellipse(boundX, boundY, 1, 1);
 }
