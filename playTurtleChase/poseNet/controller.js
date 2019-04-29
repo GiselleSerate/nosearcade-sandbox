@@ -13,6 +13,11 @@ let poses = [];
 let noseX;
 let noseY;
 
+// Boxcar/moving average filter (face frame)
+let boxcarWidth = 5;
+let lastXReadings = [];
+let lastYReadings = [];
+
 
 /**
  * Function that p5 calls initially to set up graphics
@@ -81,8 +86,22 @@ function getNewCoords() {
 
   // Only detect nose keypoint of first pose.
   let nose = poses[0].pose.keypoints[0];
-  noseX = nose.position.x;
-  noseY = nose.position.y;
+
+  // Update boxcar average
+  lastXReadings.push(result[0][0]);
+  lastYReadings.push(result[0][1]);
+  if(lastXReadings.length > boxcarWidth) { // TODO I suppose I could check both arrays cause atomicity but do I care
+    lastXReadings.shift();
+    lastYReadings.shift();
+  }
+  let faceAvgX = lastXReadings.reduce((a,b) => (a+b)) / lastXReadings.length;
+  let faceAvgY = lastYReadings.reduce((a,b) => (a+b)) / lastYReadings.length;
+
+  noseX = faceAvgX;
+  noseY = faceAvgY;
+
+  // noseX = nose.position.x;
+  // noseY = nose.position.y;
 
   sendCoords(noseX, noseY);
 }
