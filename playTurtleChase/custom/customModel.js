@@ -1,13 +1,13 @@
-let imported = document.createElement('script');
+var imported = document.createElement('script');
 document.head.appendChild(imported);
 
 // Model
-let model;
+var model;
 
 // Evaluating
-let interval;
-let start = 0;
-let ticks = 0;
+var interval;
+var start = 0;
+var ticks = 0;
 
 let overlay;
 let video;
@@ -18,11 +18,6 @@ let vidHeight = 240;
 // Nose coords (monitor frame)
 let noseX;
 let noseY;
-
-// Boxcar/moving average filter (face frame)
-let boxcarWidth = 5;
-let lastXReadings = [];
-let lastYReadings = [];
 
 // Bounding box overlay coords (monitor frame)
 let boundX;
@@ -87,6 +82,11 @@ imported.onload = async function(){
   }, 1);
 };
 
+/**
+ * Using the video stream get an image and then record the nose X and Y positions and 
+ * passes them to the game.
+ * @callback sendCoords(noseX,noseY)
+ */
 function processVideo() {
   // Capture the image as an OpenCV.js image
   cap.read(src);
@@ -126,19 +126,9 @@ function processVideo() {
   // Record the result
   prediction.array().then(function(result) {
 
-    // Update boxcar average
-    lastXReadings.push(result[0][0]);
-    lastYReadings.push(result[0][1]);
-    if(lastXReadings.length > boxcarWidth) { // TODO I suppose I could check both arrays cause atomicity but do I care
-      lastXReadings.shift();
-      lastYReadings.shift();
-    }
-    let faceAvgX = lastXReadings.reduce((a,b) => (a+b)) / lastXReadings.length;
-    let faceAvgY = lastYReadings.reduce((a,b) => (a+b)) / lastYReadings.length;
-
     // Nose coordinates
-    noseX = ((faceAvgX * this.width / 96.0) + this.x) * vidWidth  / 240;
-    noseY = ((faceAvgY * this.height / 96.0) + this.y) * vidHeight / 240;
+    noseX = ((result[0][0] * this.width / 96.0) + this.x) * vidWidth  / 240;
+    noseY = ((result[0][1] * this.height / 96.0) + this.y) * vidHeight / 240;
 
     // Bounding box overlay coords
     boundX = this.x * vidWidth / 240;
@@ -157,7 +147,7 @@ function setup() {
   // Webcam capture
   video = createCapture(VIDEO);
   video.size(vidWidth, vidHeight);
-  video.parent('videoContainer')
+  video.parent('videoContainer');
 
   // Graphics overlay for monitor annotations
   pixelDensity(1);
