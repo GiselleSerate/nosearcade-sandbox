@@ -88,8 +88,8 @@ function getNewCoords() {
   let nose = poses[0].pose.keypoints[0];
 
   // Update boxcar average
-  lastXReadings.push(result[0][0]);
-  lastYReadings.push(result[0][1]);
+  lastXReadings.push(nose.position.x);
+  lastYReadings.push(nose.position.y);
   if(lastXReadings.length > boxcarWidth) { // TODO I suppose I could check both arrays cause atomicity but do I care
     lastXReadings.shift();
     lastYReadings.shift();
