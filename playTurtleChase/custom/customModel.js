@@ -1,3 +1,5 @@
+import * as math from 'mathjs'
+
 let imported = document.createElement('script');
 document.head.appendChild(imported);
 
