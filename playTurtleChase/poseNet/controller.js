@@ -13,11 +13,6 @@ let poses = [];
 let noseX;
 let noseY;
 
-// Boxcar/moving average filter (face frame)
-let boxcarWidth = 5;
-let lastXReadings = [];
-let lastYReadings = [];
-
 
 /**
  * Function that p5 calls initially to set up graphics
@@ -26,7 +21,7 @@ function setup() {
   // Webcam capture
   video = createCapture(VIDEO);
   video.size(vidWidth, vidHeight);
-  video.parent('videoContainer')
+  video.parent('videoContainer');
 
   // Graphics overlay for monitor annotations
   pixelDensity(1);
@@ -41,7 +36,7 @@ function setup() {
     scoreThreshold: 2,
     nmsRadius: 20,
     detectionType: 'single',
-  }
+  };
   // Create a new poseNet method with a single detection
   poseNet = ml5.poseNet(video, options, function() {});
 
@@ -86,22 +81,8 @@ function getNewCoords() {
 
   // Only detect nose keypoint of first pose.
   let nose = poses[0].pose.keypoints[0];
-
-  // Update boxcar average
-  lastXReadings.push(nose.position.x);
-  lastYReadings.push(nose.position.y);
-  if(lastXReadings.length > boxcarWidth) { // TODO I suppose I could check both arrays cause atomicity but do I care
-    lastXReadings.shift();
-    lastYReadings.shift();
-  }
-  let faceAvgX = lastXReadings.reduce((a,b) => (a+b)) / lastXReadings.length;
-  let faceAvgY = lastYReadings.reduce((a,b) => (a+b)) / lastYReadings.length;
-
-  noseX = faceAvgX;
-  noseY = faceAvgY;
-
-  // noseX = nose.position.x;
-  // noseY = nose.position.y;
+  noseX = nose.position.x;
+  noseY = nose.position.y;
 
   sendCoords(noseX, noseY);
 }
